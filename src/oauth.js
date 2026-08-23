@@ -441,11 +441,13 @@ function startCallbackServer(expectedState) {
     });
     server.on('error', reject);
 
-    // Timeout after 2 minutes (unref so it doesn't keep the process alive)
+    // Default 2 minutes matches upstream. Magnet Baron login wrapper sets
+    // TEAMCLAUDE_LOGIN_TIMEOUT_MS so a human can switch Claude seats first.
+    const loginTimeoutMs = Number(process.env.TEAMCLAUDE_LOGIN_TIMEOUT_MS) || 120_000;
     const timer = setTimeout(() => {
-      rejectCode(new Error('Login timed out after 2 minutes'));
+      rejectCode(new Error(`Login timed out after ${Math.round(loginTimeoutMs / 1000)} seconds`));
       server.close();
-    }, 120_000);
+    }, loginTimeoutMs);
     timer.unref();
   });
 }

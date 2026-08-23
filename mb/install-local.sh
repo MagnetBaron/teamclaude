@@ -24,13 +24,14 @@ chmod 755 "$WRAPPER"
 cat > "$LOGIN_WRAPPER" <<EOF
 #!/bin/zsh
 set -euo pipefail
-if ! command -v teamclaude >/dev/null 2>&1; then
-  print -u2 "teamclaude is not on PATH. Install with: npm install -g @karpeleslab/teamclaude"
-  exit 1
-fi
-teamclaude login --oauth
+export TEAMCLAUDE_LOGIN_TIMEOUT_MS="\${TEAMCLAUDE_LOGIN_TIMEOUT_MS:-900000}"
+"$NODE" "$REPO_ROOT/src/index.js" login --oauth
 "$WRAPPER"
-teamclaude accounts
+if command -v teamclaude >/dev/null 2>&1; then
+  teamclaude accounts
+else
+  "$NODE" "$REPO_ROOT/src/index.js" accounts
+fi
 EOF
 chmod 755 "$LOGIN_WRAPPER"
 
